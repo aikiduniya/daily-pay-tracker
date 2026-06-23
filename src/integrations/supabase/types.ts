@@ -14,7 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attendance: {
+        Row: {
+          amount: number
+          created_at: string
+          daily_wage_snapshot: number
+          id: string
+          note: string | null
+          owner_id: string
+          project_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          work_date: string
+          worker_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          daily_wage_snapshot: number
+          id?: string
+          note?: string | null
+          owner_id: string
+          project_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          work_date?: string
+          worker_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          daily_wage_snapshot?: number
+          id?: string
+          note?: string | null
+          owner_id?: string
+          project_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          work_date?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "workers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          owner_id: string
+          start_date: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          owner_id: string
+          start_date?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          owner_id?: string
+          start_date?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      workers: {
+        Row: {
+          active: boolean
+          created_at: string
+          daily_wage: number
+          id: string
+          name: string
+          owner_id: string
+          phone: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          daily_wage: number
+          id?: string
+          name: string
+          owner_id: string
+          phone?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          daily_wage?: number
+          id?: string
+          name?: string
+          owner_id?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +136,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      attendance_status: "present" | "absent" | "half_day"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +263,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      attendance_status: ["present", "absent", "half_day"],
+    },
   },
 } as const
