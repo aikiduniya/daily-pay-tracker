@@ -104,27 +104,33 @@ export type Database = {
           created_at: string
           daily_wage: number
           id: string
+          monthly_wage: number
           name: string
           owner_id: string
           phone: string | null
+          wage_type: Database["public"]["Enums"]["wage_type"]
         }
         Insert: {
           active?: boolean
           created_at?: string
-          daily_wage: number
+          daily_wage?: number
           id?: string
+          monthly_wage?: number
           name: string
           owner_id: string
           phone?: string | null
+          wage_type?: Database["public"]["Enums"]["wage_type"]
         }
         Update: {
           active?: boolean
           created_at?: string
           daily_wage?: number
           id?: string
+          monthly_wage?: number
           name?: string
           owner_id?: string
           phone?: string | null
+          wage_type?: Database["public"]["Enums"]["wage_type"]
         }
         Relationships: []
       }
@@ -137,6 +143,7 @@ export type Database = {
     }
     Enums: {
       attendance_status: "present" | "absent" | "half_day"
+      wage_type: "daily" | "monthly"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -265,6 +272,7 @@ export const Constants = {
   public: {
     Enums: {
       attendance_status: ["present", "absent", "half_day"],
+      wage_type: ["daily", "monthly"],
     },
   },
 } as const

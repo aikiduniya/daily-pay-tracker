@@ -57,7 +57,7 @@ function AuthPage() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">WorkTrack</CardTitle>
           <CardDescription>
-            Projects, attendance aur daily wages — sab ek jagah
+            Projects, attendance and wages — all in one place
           </CardDescription>
         </CardHeader>
         <CardContent>

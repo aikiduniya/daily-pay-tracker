@@ -56,12 +56,15 @@ function ProjectDetail() {
     },
   });
 
+  const effectiveDailyWage = (w: { wage_type: string; daily_wage: number | string; monthly_wage: number | string }) =>
+    w.wage_type === "monthly" ? Number(w.monthly_wage) / 30 : Number(w.daily_wage);
+
   const { data: attendance = [] } = useQuery({
     queryKey: ["attendance", projectId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("attendance")
-        .select("*, workers(name, daily_wage)")
+        .select("*, workers(name, wage_type, daily_wage, monthly_wage)")
         .eq("project_id", projectId)
         .order("work_date", { ascending: false })
         .order("created_at", { ascending: false });
@@ -72,10 +75,10 @@ function ProjectDetail() {
 
   const mark = useMutation({
     mutationFn: async () => {
-      if (!workerId) throw new Error("Worker select karein");
+      if (!workerId) throw new Error("Please select a worker");
       const worker = workers.find((w) => w.id === workerId);
       if (!worker) throw new Error("Worker not found");
-      const wage = Number(worker.daily_wage);
+      const wage = effectiveDailyWage(worker);
       const { data: userData } = await supabase.auth.getUser();
       const { error } = await supabase.from("attendance").upsert(
         {
@@ -148,11 +151,11 @@ function ProjectDetail() {
                 <SelectTrigger><SelectValue placeholder="Select worker" /></SelectTrigger>
                 <SelectContent>
                   {workers.length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">Pehle worker add karein</div>
+                    <div className="px-3 py-2 text-sm text-muted-foreground">Add a worker first</div>
                   ) : (
                     workers.map((w) => (
                       <SelectItem key={w.id} value={w.id}>
-                        {w.name} (PKR {Number(w.daily_wage).toLocaleString()})
+                        {w.name} (PKR {effectiveDailyWage(w).toLocaleString()} /day{w.wage_type === "monthly" ? " · monthly" : ""})
                       </SelectItem>
                     ))
                   )}
@@ -183,7 +186,7 @@ function ProjectDetail() {
         <CardHeader><CardTitle>Attendance log</CardTitle></CardHeader>
         <CardContent>
           {attendance.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Koi entry nahi. Upar se mark karein.</p>
+            <p className="text-muted-foreground text-sm">No entries yet. Mark attendance above.</p>
           ) : (
             <Table>
               <TableHeader>

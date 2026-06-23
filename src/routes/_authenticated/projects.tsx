@@ -64,7 +64,7 @@ function ProjectsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-          <p className="text-muted-foreground mt-1">Project kholo, attendance lagao, expense automatic banegi.</p>
+          <p className="text-muted-foreground mt-1">Open a project, mark attendance, and expenses are calculated automatically.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -94,7 +94,7 @@ function ProjectsPage() {
       ) : projects.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            Koi project nahi. New Project banao.
+            No projects yet. Create your first one.
           </CardContent>
         </Card>
       ) : (

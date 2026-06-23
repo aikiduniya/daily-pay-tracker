@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,10 +17,18 @@ export const Route = createFileRoute("/_authenticated/workers")({
   component: WorkersPage,
 });
 
+type WageType = "daily" | "monthly";
+
 function WorkersPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", phone: "", daily_wage: "" });
+  const [form, setForm] = useState<{
+    name: string;
+    phone: string;
+    wage_type: WageType;
+    daily_wage: string;
+    monthly_wage: string;
+  }>({ name: "", phone: "", wage_type: "daily", daily_wage: "", monthly_wage: "" });
 
   const { data: workers = [], isLoading } = useQuery({
     queryKey: ["workers"],
@@ -32,7 +42,6 @@ function WorkersPage() {
     },
   });
 
-  // Per-worker totals
   const { data: totals = {} } = useQuery({
     queryKey: ["worker-totals"],
     queryFn: async () => {
@@ -52,11 +61,15 @@ function WorkersPage() {
   const addWorker = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
+      const daily = form.wage_type === "daily" ? Number(form.daily_wage) : 0;
+      const monthly = form.wage_type === "monthly" ? Number(form.monthly_wage) : 0;
       const { error } = await supabase.from("workers").insert({
         owner_id: userData.user!.id,
         name: form.name.trim(),
         phone: form.phone.trim() || null,
-        daily_wage: Number(form.daily_wage),
+        wage_type: form.wage_type,
+        daily_wage: daily,
+        monthly_wage: monthly,
       });
       if (error) throw error;
     },
@@ -64,7 +77,7 @@ function WorkersPage() {
       toast.success("Worker added");
       qc.invalidateQueries({ queryKey: ["workers"] });
       setOpen(false);
-      setForm({ name: "", phone: "", daily_wage: "" });
+      setForm({ name: "", phone: "", wage_type: "daily", daily_wage: "", monthly_wage: "" });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -87,7 +100,7 @@ function WorkersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Workers</h1>
-          <p className="text-muted-foreground mt-1">Daily wage workers ki list aur unki total earnings.</p>
+          <p className="text-muted-foreground mt-1">Manage workers with daily or monthly wages and track their total earnings.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -108,9 +121,27 @@ function WorkersPage() {
                 <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
               <div className="space-y-2">
-                <Label>Daily wage (PKR)</Label>
-                <Input type="number" min="0" step="0.01" required value={form.daily_wage} onChange={(e) => setForm({ ...form, daily_wage: e.target.value })} />
+                <Label>Wage type</Label>
+                <Select value={form.wage_type} onValueChange={(v) => setForm({ ...form, wage_type: v as WageType })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily wage</SelectItem>
+                    <SelectItem value="monthly">Monthly salary</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
+              {form.wage_type === "daily" ? (
+                <div className="space-y-2">
+                  <Label>Daily wage (PKR)</Label>
+                  <Input type="number" min="0" step="0.01" required value={form.daily_wage} onChange={(e) => setForm({ ...form, daily_wage: e.target.value })} />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label>Monthly salary (PKR)</Label>
+                  <Input type="number" min="0" step="0.01" required value={form.monthly_wage} onChange={(e) => setForm({ ...form, monthly_wage: e.target.value })} />
+                  <p className="text-xs text-muted-foreground">Per-day rate is calculated as monthly salary ÷ 30.</p>
+                </div>
+              )}
               <DialogFooter>
                 <Button type="submit" disabled={addWorker.isPending}>Add</Button>
               </DialogFooter>
@@ -125,14 +156,15 @@ function WorkersPage() {
           {isLoading ? (
             <p className="text-muted-foreground">Loading…</p>
           ) : workers.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Koi worker nahi. Add karein.</p>
+            <p className="text-muted-foreground text-sm">No workers yet. Add one to get started.</p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead className="text-right">Daily wage</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Wage</TableHead>
                   <TableHead className="text-right">Days worked</TableHead>
                   <TableHead className="text-right">Total earned</TableHead>
                   <TableHead></TableHead>
@@ -141,11 +173,20 @@ function WorkersPage() {
               <TableBody>
                 {workers.map((w) => {
                   const t = totals[w.id] ?? { earned: 0, days: 0 };
+                  const isMonthly = w.wage_type === "monthly";
+                  const wage = isMonthly ? Number(w.monthly_wage) : Number(w.daily_wage);
                   return (
                     <TableRow key={w.id}>
                       <TableCell className="font-medium">{w.name}</TableCell>
                       <TableCell>{w.phone ?? "—"}</TableCell>
-                      <TableCell className="text-right">PKR {Number(w.daily_wage).toLocaleString()}</TableCell>
+                      <TableCell>
+                        <Badge variant={isMonthly ? "secondary" : "default"}>
+                          {isMonthly ? "Monthly" : "Daily"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        PKR {wage.toLocaleString()}{isMonthly ? " /mo" : " /day"}
+                      </TableCell>
                       <TableCell className="text-right">{t.days}</TableCell>
                       <TableCell className="text-right font-medium">PKR {t.earned.toLocaleString()}</TableCell>
                       <TableCell className="text-right">
