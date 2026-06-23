@@ -151,11 +151,11 @@ function ProjectDetail() {
                 <SelectTrigger><SelectValue placeholder="Select worker" /></SelectTrigger>
                 <SelectContent>
                   {workers.length === 0 ? (
-                    <div className="px-3 py-2 text-sm text-muted-foreground">Pehle worker add karein</div>
+                    <div className="px-3 py-2 text-sm text-muted-foreground">Add a worker first</div>
                   ) : (
                     workers.map((w) => (
                       <SelectItem key={w.id} value={w.id}>
-                        {w.name} (PKR {Number(w.daily_wage).toLocaleString()})
+                        {w.name} (PKR {effectiveDailyWage(w).toLocaleString()} /day{w.wage_type === "monthly" ? " · monthly" : ""})
                       </SelectItem>
                     ))
                   )}
@@ -186,7 +186,7 @@ function ProjectDetail() {
         <CardHeader><CardTitle>Attendance log</CardTitle></CardHeader>
         <CardContent>
           {attendance.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Koi entry nahi. Upar se mark karein.</p>
+            <p className="text-muted-foreground text-sm">No entries yet. Mark attendance above.</p>
           ) : (
             <Table>
               <TableHeader>
