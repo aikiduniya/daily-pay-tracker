@@ -94,7 +94,7 @@ function ProjectsPage() {
       ) : projects.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            Koi project nahi. New Project banao.
+            No projects yet. Create your first one.
           </CardContent>
         </Card>
       ) : (
