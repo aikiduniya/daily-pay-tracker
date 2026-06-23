@@ -63,7 +63,7 @@ function Dashboard() {
               <CardTitle className="flex items-center gap-2"><FolderKanban className="h-5 w-5" /> Manage Projects</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Add projects, mark attendance per day, dekho kitna kharcha hua.
+              Add projects, mark daily attendance, and see total expenses.
             </CardContent>
           </Card>
         </Link>
@@ -73,7 +73,7 @@ function Dashboard() {
               <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Manage Workers</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
-              Workers add karein with daily wage. Total earnings track ho jayengi.
+              Add workers with daily or monthly wages and track earnings automatically.
             </CardContent>
           </Card>
         </Link>
