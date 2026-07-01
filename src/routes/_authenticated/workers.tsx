@@ -20,21 +20,67 @@ export const Route = createFileRoute("/_authenticated/workers")({
 
 type WageType = "daily" | "monthly";
 
-const emptyForm = { name: "", phone: "", wage_type: "daily" as WageType, daily_wage: "", monthly_wage: "" };
+const emptyForm = {
+  name: "",
+  phone: "",
+  wage_type: "daily" as WageType,
+  daily_wage: "",
+  monthly_wage: "",
+};
 
+function WorkerFormFields({
+  form,
+  setForm,
+}: {
+  form: typeof emptyForm;
+  setForm: React.Dispatch<React.SetStateAction<typeof emptyForm>>;
+}) {
+  return (
+    <>
+      <div className="space-y-2">
+        <Label>Name</Label>
+        <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+      </div>
+      <div className="space-y-2">
+        <Label>Phone (optional)</Label>
+        <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+      </div>
+      <div className="space-y-2">
+        <Label>Wage type</Label>
+        <Select value={form.wage_type} onValueChange={(v) => setForm({ ...form, wage_type: v as WageType })}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="daily">Daily wage</SelectItem>
+            <SelectItem value="monthly">Monthly salary</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      {form.wage_type === "daily" ? (
+        <div className="space-y-2">
+          <Label>Daily wage (PKR)</Label>
+          <Input type="number" min="0" step="0.01" required value={form.daily_wage} onChange={(e) => setForm({ ...form, daily_wage: e.target.value })} />
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Label>Monthly salary (PKR)</Label>
+          <Input type="number" min="0" step="0.01" required value={form.monthly_wage} onChange={(e) => setForm({ ...form, monthly_wage: e.target.value })} />
+          <p className="text-xs text-muted-foreground">Per-day rate is calculated as monthly salary ÷ 30.</p>
+        </div>
+      )}
+    </>
+  );
+}
 
 function WorkersPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<{
-    name: string;
-    phone: string;
-    wage_type: WageType;
-    daily_wage: string;
-    monthly_wage: string;
-  }>({ name: "", phone: "", wage_type: "daily", daily_wage: "", monthly_wage: "" });
+  const [form, setForm] = useState(emptyForm);
 
-  const { data: workers = [], isLoading } = useQuery({
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState(emptyForm);
+
+  const { data: workers = [], isLoading } = useQuery<Tables<"workers">[]>({
     queryKey: ["workers"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -81,7 +127,31 @@ function WorkersPage() {
       toast.success("Worker added");
       qc.invalidateQueries({ queryKey: ["workers"] });
       setOpen(false);
-      setForm({ name: "", phone: "", wage_type: "daily", daily_wage: "", monthly_wage: "" });
+      setForm(emptyForm);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const updateWorker = useMutation({
+    mutationFn: async () => {
+      if (!editId) return;
+      const daily = editForm.wage_type === "daily" ? Number(editForm.daily_wage) : 0;
+      const monthly = editForm.wage_type === "monthly" ? Number(editForm.monthly_wage) : 0;
+      const { error } = await supabase.from("workers").update({
+        name: editForm.name.trim(),
+        phone: editForm.phone.trim() || null,
+        wage_type: editForm.wage_type,
+        daily_wage: daily,
+        monthly_wage: monthly,
+      }).eq("id", editId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Worker updated");
+      qc.invalidateQueries({ queryKey: ["workers"] });
+      setEditOpen(false);
+      setEditId(null);
+      setEditForm(emptyForm);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -98,6 +168,18 @@ function WorkersPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const openEdit = (w: Tables<"workers">) => {
+    setEditId(w.id);
+    setEditForm({
+      name: w.name,
+      phone: w.phone ?? "",
+      wage_type: w.wage_type,
+      daily_wage: w.wage_type === "daily" ? String(w.daily_wage) : "",
+      monthly_wage: w.wage_type === "monthly" ? String(w.monthly_wage) : "",
+    });
+    setEditOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -116,36 +198,7 @@ function WorkersPage() {
               onSubmit={(e) => { e.preventDefault(); addWorker.mutate(); }}
               className="space-y-4"
             >
-              <div className="space-y-2">
-                <Label>Name</Label>
-                <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Phone (optional)</Label>
-                <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Wage type</Label>
-                <Select value={form.wage_type} onValueChange={(v) => setForm({ ...form, wage_type: v as WageType })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="daily">Daily wage</SelectItem>
-                    <SelectItem value="monthly">Monthly salary</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {form.wage_type === "daily" ? (
-                <div className="space-y-2">
-                  <Label>Daily wage (PKR)</Label>
-                  <Input type="number" min="0" step="0.01" required value={form.daily_wage} onChange={(e) => setForm({ ...form, daily_wage: e.target.value })} />
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label>Monthly salary (PKR)</Label>
-                  <Input type="number" min="0" step="0.01" required value={form.monthly_wage} onChange={(e) => setForm({ ...form, monthly_wage: e.target.value })} />
-                  <p className="text-xs text-muted-foreground">Per-day rate is calculated as monthly salary ÷ 30.</p>
-                </div>
-              )}
+              <WorkerFormFields form={form} setForm={setForm} />
               <DialogFooter>
                 <Button type="submit" disabled={addWorker.isPending}>Add</Button>
               </DialogFooter>
@@ -153,6 +206,21 @@ function WorkersPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <Dialog open={editOpen} onOpenChange={(v) => { setEditOpen(v); if (!v) { setEditId(null); setEditForm(emptyForm); } }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Edit worker</DialogTitle></DialogHeader>
+          <form
+            onSubmit={(e) => { e.preventDefault(); updateWorker.mutate(); }}
+            className="space-y-4"
+          >
+            <WorkerFormFields form={editForm} setForm={setEditForm} />
+            <DialogFooter>
+              <Button type="submit" disabled={updateWorker.isPending}>Save</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader><CardTitle>All workers</CardTitle></CardHeader>
@@ -194,6 +262,9 @@ function WorkersPage() {
                       <TableCell className="text-right">{t.days}</TableCell>
                       <TableCell className="text-right font-medium">PKR {t.earned.toLocaleString()}</TableCell>
                       <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(w)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => deleteWorker.mutate(w.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
