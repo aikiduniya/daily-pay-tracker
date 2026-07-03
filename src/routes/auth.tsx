@@ -10,8 +10,8 @@ import { toast } from "sonner";
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@worktrack.app");
+  const [password, setPassword] = useState("WrkTrk!Adm1n#2026$Pk");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
