@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Users, FolderKanban, LogOut } from "lucide-react";
@@ -9,12 +9,11 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate("/auth", { replace: true });
   };
 
   const navItem =
     "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors";
-  const activeProps = { className: "bg-accent text-foreground" };
 
   return (
     <div className="min-h-screen bg-background">
@@ -24,13 +23,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link to="/dashboard" className="font-bold text-lg mr-4">
               WorkTrack
             </Link>
-            <Link to="/dashboard" className={navItem} activeProps={activeProps}>
+            <Link to="/dashboard" className={navItem}>
               <LayoutDashboard className="h-4 w-4" /> Dashboard
             </Link>
-            <Link to="/projects" className={navItem} activeProps={activeProps}>
+            <Link to="/projects" className={navItem}>
               <FolderKanban className="h-4 w-4" /> Projects
             </Link>
-            <Link to="/workers" className={navItem} activeProps={activeProps}>
+            <Link to="/workers" className={navItem}>
               <Users className="h-4 w-4" /> Workers
             </Link>
           </div>

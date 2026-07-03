@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link, useParams } from "react-router-dom";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,10 +14,6 @@ import { toast } from "sonner";
 
 type Status = "present" | "absent" | "half_day";
 
-export const Route = createFileRoute("/_authenticated/projects/$projectId")({
-  component: ProjectDetail,
-});
-
 function amountFor(status: Status, wage: number) {
   if (status === "present") return wage;
   if (status === "half_day") return wage / 2;
@@ -30,8 +26,8 @@ const statusLabel: Record<Status, string> = {
   half_day: "Half-day",
 };
 
-function ProjectDetail() {
-  const { projectId } = Route.useParams();
+export default function ProjectDetail() {
+  const { projectId = "" } = useParams();
   const qc = useQueryClient();
 
   const [workerId, setWorkerId] = useState<string>("");
@@ -125,27 +121,17 @@ function ProjectDetail() {
         <ArrowLeft className="h-4 w-4 mr-1" /> All projects
       </Link>
 
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{project?.name ?? "…"}</h1>
-          {project?.description && <p className="text-muted-foreground mt-1">{project.description}</p>}
-        </div>
-        <Card className="min-w-[200px]">
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground">Total expense</div>
-            <div className="text-2xl font-bold">PKR {totalExpense.toLocaleString()}</div>
-          </CardContent>
-        </Card>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">{project?.name ?? "Project"}</h1>
+        {project?.description && <p className="text-muted-foreground mt-1">{project.description}</p>}
+        <p className="text-sm text-muted-foreground mt-2">Total expense: <span className="font-semibold text-foreground">PKR {totalExpense.toLocaleString()}</span></p>
       </div>
 
       <Card>
         <CardHeader><CardTitle>Mark attendance</CardTitle></CardHeader>
         <CardContent>
-          <form
-            onSubmit={(e) => { e.preventDefault(); mark.mutate(); }}
-            className="grid gap-4 sm:grid-cols-4 items-end"
-          >
-            <div className="space-y-2">
+          <form onSubmit={(e) => { e.preventDefault(); mark.mutate(); }} className="grid gap-4 sm:grid-cols-4 items-end">
+            <div className="space-y-2 sm:col-span-2">
               <Label>Worker</Label>
               <Select value={workerId} onValueChange={setWorkerId}>
                 <SelectTrigger><SelectValue placeholder="Select worker" /></SelectTrigger>

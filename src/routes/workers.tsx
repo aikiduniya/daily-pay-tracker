@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,10 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
-
-export const Route = createFileRoute("/_authenticated/workers")({
-  component: WorkersPage,
-});
 
 type WageType = "daily" | "monthly";
 
@@ -71,7 +66,7 @@ function WorkerFormFields({
   );
 }
 
-function WorkersPage() {
+export default function WorkersPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -174,9 +169,9 @@ function WorkersPage() {
     setEditForm({
       name: w.name,
       phone: w.phone ?? "",
-      wage_type: w.wage_type,
-      daily_wage: w.wage_type === "daily" ? String(w.daily_wage) : "",
-      monthly_wage: w.wage_type === "monthly" ? String(w.monthly_wage) : "",
+      wage_type: (w.wage_type as WageType) ?? "daily",
+      daily_wage: String(w.daily_wage ?? ""),
+      monthly_wage: String(w.monthly_wage ?? ""),
     });
     setEditOpen(true);
   };
@@ -186,7 +181,7 @@ function WorkersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Workers</h1>
-          <p className="text-muted-foreground mt-1">Manage workers with daily or monthly wages and track their total earnings.</p>
+          <p className="text-muted-foreground mt-1">Add workers with daily or monthly wages. Attendance auto-calculates earnings.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -194,29 +189,23 @@ function WorkersPage() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>New worker</DialogTitle></DialogHeader>
-            <form
-              onSubmit={(e) => { e.preventDefault(); addWorker.mutate(); }}
-              className="space-y-4"
-            >
+            <form onSubmit={(e) => { e.preventDefault(); addWorker.mutate(); }} className="space-y-4">
               <WorkerFormFields form={form} setForm={setForm} />
               <DialogFooter>
-                <Button type="submit" disabled={addWorker.isPending}>Add</Button>
+                <Button type="submit" disabled={addWorker.isPending}>Save</Button>
               </DialogFooter>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <Dialog open={editOpen} onOpenChange={(v) => { setEditOpen(v); if (!v) { setEditId(null); setEditForm(emptyForm); } }}>
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Edit worker</DialogTitle></DialogHeader>
-          <form
-            onSubmit={(e) => { e.preventDefault(); updateWorker.mutate(); }}
-            className="space-y-4"
-          >
+          <form onSubmit={(e) => { e.preventDefault(); updateWorker.mutate(); }} className="space-y-4">
             <WorkerFormFields form={editForm} setForm={setEditForm} />
             <DialogFooter>
-              <Button type="submit" disabled={updateWorker.isPending}>Save</Button>
+              <Button type="submit" disabled={updateWorker.isPending}>Update</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -228,7 +217,7 @@ function WorkersPage() {
           {isLoading ? (
             <p className="text-muted-foreground">Loading…</p>
           ) : workers.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No workers yet. Add one to get started.</p>
+            <p className="text-muted-foreground text-sm">No workers yet. Add your first worker.</p>
           ) : (
             <Table>
               <TableHeader>
@@ -237,14 +226,14 @@ function WorkersPage() {
                   <TableHead>Phone</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead className="text-right">Wage</TableHead>
-                  <TableHead className="text-right">Days worked</TableHead>
-                  <TableHead className="text-right">Total earned</TableHead>
+                  <TableHead className="text-right">Days</TableHead>
+                  <TableHead className="text-right">Earned</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {workers.map((w) => {
-                  const t = totals[w.id] ?? { earned: 0, days: 0 };
+                  const t = (totals as Record<string, { earned: number; days: number }>)[w.id] ?? { earned: 0, days: 0 };
                   const isMonthly = w.wage_type === "monthly";
                   const wage = isMonthly ? Number(w.monthly_wage) : Number(w.daily_wage);
                   return (

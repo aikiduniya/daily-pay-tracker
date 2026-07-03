@@ -1,14 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FolderKanban, Wallet, CalendarCheck } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
-  component: Dashboard,
-});
-
-function Dashboard() {
+export default function Dashboard() {
   const { data } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
