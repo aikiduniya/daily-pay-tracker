@@ -54,7 +54,7 @@ export default function AuthPage() {
           <Tabs defaultValue="login">
             <TabsList className="grid grid-cols-2 w-full">
               <TabsTrigger value="login">Sign in</TabsTrigger>
-              <TabsTrigger value="signup">Sign up</TabsTrigger>
+              {/* <TabsTrigger value="signup">Sign up</TabsTrigger> */}
             </TabsList>
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4 pt-4">
@@ -64,7 +64,13 @@ export default function AuthPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="li-pw">Password</Label>
-                  <Input id="li-pw" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Input
+                    id="li-pw"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Signing in…" : "Sign in"}
@@ -79,7 +85,14 @@ export default function AuthPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="su-pw">Password</Label>
-                  <Input id="su-pw" type="password" minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} />
+                  <Input
+                    id="su-pw"
+                    type="password"
+                    minLength={6}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Creating…" : "Create account"}
