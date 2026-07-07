@@ -8,8 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 
-
-
 export default function AuthPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("admin@worktrack.app");
@@ -56,10 +54,10 @@ export default function AuthPage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login">
-            <TabsList className="grid grid-cols-2 w-full">
+            {/* <TabsList className="grid grid-cols-2 w-full">
               <TabsTrigger value="login">Sign in</TabsTrigger>
-              {/* <TabsTrigger value="signup">Sign up</TabsTrigger> */}
-            </TabsList>
+              <TabsTrigger value="signup">Sign up</TabsTrigger>
+            </TabsList> */}
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4 pt-4">
                 <div className="space-y-2">
