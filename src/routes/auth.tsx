@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import vertexLogo from "@/assets/vertex.jpeg.asset.json";
+
 
 
 export default function AuthPage() {
@@ -50,7 +50,7 @@ export default function AuthPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl flex justify-center">
-            <img src={vertexLogo.url} alt="Vertex Way" className="h-14 w-auto object-contain" />
+            <img src="/vertex.jpeg" alt="Vertex Way" className="h-14 w-auto object-contain" />
           </CardTitle>
           <CardDescription>Projects, attendance and wages — all in one place</CardDescription>
         </CardHeader>

@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, Users, FolderKanban, LogOut, Phone, Mail, Globe } from "lucide-react";
 import type { ReactNode } from "react";
-import vertexLogo from "@/assets/vertex.jpeg.asset.json";
+
 
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -23,7 +23,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-1">
             <Link to="/dashboard" className="mr-4">
-              <img src={vertexLogo.url} alt="Vertex Way" className="h-10 w-auto object-contain" />
+              <img src="/vertex.jpeg" alt="Vertex Way" className="h-10 w-auto object-contain" />
             </Link>
             <Link to="/dashboard" className={navItem}>
               <LayoutDashboard className="h-4 w-4" /> Dashboard
@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="border-t border-border bg-card mt-auto">
         <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <img src={vertexLogo.url} alt="Vertex Way" className="h-8 w-auto object-contain" />
+            <img src="/vertex.jpeg" alt="Vertex Way" className="h-8 w-auto object-contain" />
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a href="tel:+971589357188" className="flex items-center gap-1 hover:text-foreground">
