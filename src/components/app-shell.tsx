@@ -42,11 +42,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
       <main className="max-w-6xl mx-auto px-4 py-8 flex-1 w-full">{children}</main>
       <footer className="border-t border-border bg-card mt-auto">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-muted-foreground">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <img src="/vertex.jpeg" alt="Vertex Way" className="h-8 w-auto object-contain" />
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6">
             <a href="tel:+971589357188" className="flex items-center gap-1 hover:text-foreground">
               <Phone className="h-4 w-4" /> +971 58 935 7188
             </a>
