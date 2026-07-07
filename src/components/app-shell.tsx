@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Users, FolderKanban, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, FolderKanban, LogOut, Phone, Mail, Globe } from "lucide-react";
 import type { ReactNode } from "react";
+import vertexLogo from "@/assets/vertex.jpeg.asset.json";
+
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
